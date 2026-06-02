@@ -1,0 +1,88 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Device {
+  device_id      String    @id
+  type           String
+  company        String
+  name           String
+  location       String
+  timezone       String
+  floor_count    Int?
+  installed_date String
+  reading_types  String[]
+  thresholds     Json
+
+  readings Reading[]
+  alerts   Alert[]
+
+  @@index([company])
+}
+
+model Reading {
+  id          Int      @id @default(autoincrement())
+  device_id   String
+  timestamp   DateTime
+  input_name  String
+  input_value Float
+
+  device Device @relation(fields: [device_id], references: [device_id])
+
+  @@unique([device_id, timestamp, input_name])
+  @@index([device_id, timestamp])
+}
+
+model User {
+  id      Int    @id @default(autoincrement())
+  name    String
+  role    String
+  company String
+  token   String @unique
+  email   String
+
+  assigned_alerts Alert[] @relation("AssignedAlerts")
+
+  @@index([company])
+}
+
+model Alert {
+  id Int @id @default(autoincrement())
+
+  device_id     String
+  alert_type    String
+  severity      String
+  triggered_at  DateTime
+  threshold     Float?
+  reading_value Float?
+  reading_name  String?
+
+  status                         String    @default("new")
+  assigned_to                    Int?
+  acknowledged_at                DateTime?
+  resolved_at                    DateTime?
+  resolution_type                String?
+  resolution_root_cause          String?
+  resolution_action_taken        String?
+  resolution_preventive_measures String?
+  resolution_time_spent_minutes  Int?
+
+  timeline Json @default("[]")
+
+  device   Device @relation(fields: [device_id], references: [device_id])
+  assignee User?  @relation("AssignedAlerts", fields: [assigned_to], references: [id])
+
+  @@unique([device_id, triggered_at, alert_type])
+  @@index([status])
+  @@index([severity])
+}
