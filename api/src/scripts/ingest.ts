@@ -53,7 +53,10 @@ async function main() {
 
   // pull all devices once - we need thresholds for every reading check
   const devices = await prisma.device.findMany()
-  const deviceMap = new Map(devices.map(d => [d.device_id, d]))
+  const deviceMap = new Map<string, (typeof devices)[0]>()
+  for (const d of devices) {
+    deviceMap.set(d.device_id, d)
+  }
   console.log(`loaded ${deviceMap.size} devices from db\n`)
 
   const stats = {
