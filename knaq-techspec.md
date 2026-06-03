@@ -152,35 +152,37 @@ model User {
 }
 
 model Alert {
-  id           Int       @id @default(autoincrement())
-  
+  id Int @id @default(autoincrement())
+
   // immutable - what the device reported
-  device_id    String
-  alert_type   String
-  severity     String    // critical | warning | info
-  triggered_at DateTime
-  threshold    Float?
+  device_id     String
+  alert_type    String
+  severity      String    // critical | warning | info
+  triggered_at  DateTime
+  threshold     Float?
   reading_value Float?
   reading_name  String?
-  
-  // mutable - triage state
-  status              String    @default("new") // new | acknowledged | resolved | dismissed
-  assigned_to         Int?
-  acknowledged_at     DateTime?
-  resolved_at         DateTime?
-  resolution_type     String?   // fixed | false_alarm | known_issue | deferred | cannot_reproduce
-  root_cause          String?
-  action_taken        String?
-  preventive_measures String?
-  time_spent_minutes  Int?
-  
-  // audit trail
-  timeline    Json      @default("[]") // TimelineEntry[]
 
-  device      Device    @relation(fields: [device_id], references: [device_id])
-  assignee    User?     @relation("AssignedAlerts", fields: [assigned_to], references: [id])
-  
+  // mutable - triage state
+  status                         String    @default("new") // new | acknowledged | resolved | dismissed
+  assigned_to                    Int?
+  acknowledged_at                DateTime?
+  resolved_at                    DateTime?
+  resolution_type                String?   // fixed | false_alarm | known_issue | deferred | cannot_reproduce
+  resolution_root_cause          String?
+  resolution_action_taken        String?
+  resolution_preventive_measures String?
+  resolution_time_spent_minutes  Int?
+
+  // audit trail
+  timeline Json @default("[]") // TimelineEntry[]
+
+  device   Device @relation(fields: [device_id], references: [device_id])
+  assignee User?  @relation("AssignedAlerts", fields: [assigned_to], references: [id])
+
   @@unique([device_id, triggered_at, alert_type]) // dedup constraint
+  @@index([status])
+  @@index([severity])
 }
 ```
 
@@ -347,11 +349,11 @@ POST /alerts/:id/assign
 
 POST /alerts/:id/resolve
   body: {
-    resolution_type: "fixed" | "false_alarm" | "known_issue" | "deferred" | "cannot_reproduce"
-    root_cause: string           (required)
-    action_taken: string         (required)
-    preventive_measures?: string
-    time_spent_minutes?: number
+    resolution_type:                "fixed" | "false_alarm" | "known_issue" | "deferred" | "cannot_reproduce"
+    resolution_root_cause:          string   (required)
+    resolution_action_taken:        string   (required)
+    resolution_preventive_measures?: string
+    resolution_time_spent_minutes?:  number
   }
   transition: acknowledged → resolved
   side effects: sets resolved_at + all resolution fields, appends timeline entry
@@ -500,11 +502,11 @@ interface Alert {
   assigned_to?: number
   acknowledged_at?: string
   resolved_at?: string
-  resolution_type?: string
-  root_cause?: string
-  action_taken?: string
-  preventive_measures?: string
-  time_spent_minutes?: number
+  resolution_type?:                string
+  resolution_root_cause?:          string
+  resolution_action_taken?:        string
+  resolution_preventive_measures?: string
+  resolution_time_spent_minutes?:  number
   timeline: TimelineEntry[]
   device: Device
   assignee?: User
