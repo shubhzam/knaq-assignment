@@ -1,0 +1,54 @@
+version: "3.9"
+
+services:
+  # postgres database
+  postgres:
+    image: postgres:16
+    container_name: knaq-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: knaq
+    ports:
+      - "5432:5432"
+    volumes:
+      - knaq_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # express api
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: knaq-api
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/knaq
+      PORT: 8000
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # next.js frontend
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    container_name: knaq-web
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+      NEXT_PUBLIC_TOKEN: token-sarah
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+
+volumes:
+  knaq_pgdata:
