@@ -78,16 +78,11 @@ export interface AssignPayload {
 
 // body for POST /alerts/:id/resolve
 export interface ResolvePayload {
-  resolution_type:
-    | "fixed"
-    | "false_alarm"
-    | "known_issue"
-    | "deferred"
-    | "cannot_reproduce";
-  resolution_root_cause: string;
-  resolution_action_taken: string;
-  resolution_preventive_measures?: string;
-  resolution_time_spent_minutes?: number;
+  resolution_type: "fixed" | "false_alarm" | "known_issue" | "deferred" | "cannot_reproduce";
+  root_cause: string;
+  action_taken: string;
+  preventive_measures?: string;
+  time_spent_minutes?: number;
 }
 
 // body for POST /alerts/:id/notes
