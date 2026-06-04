@@ -2,21 +2,29 @@
 
 import { ReactNode } from "react";
 import { Provider } from "react-redux";
-import { ThemeProvider, CssBaseline } from "@mui/material";
+import { ThemeProvider, CssBaseline, AppBar, Toolbar, Typography, Box } from "@mui/material";
 import { store } from "@/lib/store";
 import theme from "@/lib/theme";
-
+import UserSwitcher from "@/components/UserSwitcher";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <body>
-        {/* Provider makes the Redux store available to every component below */}
         <Provider store={store}>
-          {/* ThemeProvider makes MUI use our brand colors everywhere */}
           <ThemeProvider theme={theme}>
-            {/* CssBaseline normalizes browser default styles - like a CSS reset */}
             <CssBaseline />
+
+            {/* top nav bar */}
+            <AppBar position="static" sx={{ bgcolor: "background.paper", borderBottom: "1px solid rgba(255,255,255,0.06)" }} elevation={0}>
+              <Toolbar sx={{ justifyContent: "space-between" }}>
+                <Typography variant="h6" sx={{ color: "primary.main", fontWeight: 700, letterSpacing: "0.1em" }}>
+                  KNAQ
+                </Typography>
+                <UserSwitcher />
+              </Toolbar>
+            </AppBar>
+
             {children}
           </ThemeProvider>
         </Provider>
