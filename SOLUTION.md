@@ -140,7 +140,7 @@ In order of what I would actually prioritize:
 
 ## AI disclosure
 
-I used Claude (Anthropic) as a coding assistant throughout - scaffolding the Prisma schema, Express routes, RTK Query layer, and MUI components. Architectural decisions (storage choice, inline triage vs separate table, timeline as JSON, pessimistic updates, where transition enforcement lives) were mine. The assistant sped up the typing, not the thinking.
+Made with <3 Claude-Code
 
 ---
 
